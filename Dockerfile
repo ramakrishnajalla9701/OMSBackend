@@ -2,19 +2,27 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy the backend project from the repository root context
-COPY Backend/ ./Backend/
-WORKDIR /src/Backend
+# Copy the current directory contents into the image
+COPY . ./
 
-# Restore dependencies
-RUN dotnet restore "Backend.csproj"
-
-# Build the application
-RUN dotnet build "Backend.csproj" -c Release -o /app/build
+# Build the backend app from the copied backend folder
+RUN if [ -f /src/Backend.csproj ]; then \
+      dotnet restore "Backend.csproj" && dotnet build "Backend.csproj" -c Release -o /app/build; \
+    elif [ -f /src/Backend/Backend.csproj ]; then \
+      cd /src/Backend && dotnet restore "Backend.csproj" && dotnet build "Backend.csproj" -c Release -o /app/build; \
+    else \
+      echo "Backend project not found" && exit 1; \
+    fi
 
 # Publish stage
 FROM build AS publish
-RUN dotnet publish "Backend.csproj" -c Release -o /app/publish
+RUN if [ -f /src/Backend.csproj ]; then \
+      dotnet publish "/src/Backend.csproj" -c Release -o /app/publish; \
+    elif [ -f /src/Backend/Backend.csproj ]; then \
+      dotnet publish "/src/Backend/Backend.csproj" -c Release -o /app/publish; \
+    else \
+      echo "Backend project not found" && exit 1; \
+    fi
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
