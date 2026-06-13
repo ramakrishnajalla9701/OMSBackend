@@ -2,14 +2,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy project file
-COPY ["Backend.csproj", "./"]
+# Copy the backend project files into the build context
+COPY . ./
 
 # Restore dependencies
 RUN dotnet restore "Backend.csproj"
-
-# Copy source code
-COPY . .
 
 # Build the application
 RUN dotnet build "Backend.csproj" -c Release -o /app/build
