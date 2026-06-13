@@ -2,17 +2,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy the build context into the image
-COPY . ./
-
-# Support both repo-root and backend-folder build contexts
-RUN if [ -f /src/Backend.csproj ]; then \
-        echo "Using backend project from build context root"; \
-    elif [ -f /src/Backend/Backend.csproj ]; then \
-        cp -R /src/Backend/. /src/; \
-    else \
-        echo "Backend.csproj not found in build context"; exit 1; \
-    fi
+# Copy the backend project from the repository root context
+COPY Backend/ ./Backend/
+WORKDIR /src/Backend
 
 # Restore dependencies
 RUN dotnet restore "Backend.csproj"
