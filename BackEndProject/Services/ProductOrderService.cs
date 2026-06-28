@@ -69,12 +69,14 @@ namespace Backend.Services
                 CustomerName = request.CustomerName,
                 Address = request.Address,
                 AssignedToUserId = request.AssignedToUserId,
+                AssignedToName = request.AssignedToName ?? string.Empty,
                 ProductName = request.ProductName,
                 OrderQuantityMeters = request.OrderQuantityMeters,
                 CostPerMeterPO = request.CostPerMeterPO,
                 CostPerMeterProduction = request.CostPerMeterProduction,
                 CurrentStatus = request.CurrentStatus,
                 Comments = request.Comments,
+                UploadedImages = request.UploadedImages ?? new List<string>(),
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -119,6 +121,9 @@ namespace Backend.Services
             if (request.AssignedToUserId.HasValue)
                 order.AssignedToUserId = request.AssignedToUserId.Value == 0 ? null : request.AssignedToUserId.Value;
 
+            if (request.AssignedToName != null)
+                order.AssignedToName = request.AssignedToName;
+
             if (!string.IsNullOrWhiteSpace(request.ProductName))
                 order.ProductName = request.ProductName;
 
@@ -136,6 +141,9 @@ namespace Backend.Services
 
             if (request.AmountReceived.HasValue)
                 order.AmountReceived = request.AmountReceived.Value;
+
+            if (request.UploadedImages != null)
+                order.UploadedImages = request.UploadedImages;
 
             if (!string.IsNullOrWhiteSpace(request.CurrentStatus))
                 order.CurrentStatus = request.CurrentStatus;
@@ -198,7 +206,8 @@ namespace Backend.Services
                 TotalAmountPending = orders.Sum(o => o.AmountToBeReceived),
                 TotalOrders = orders.Count,
                 CompletedOrders = orders.Count(o => o.CurrentStatus == "Completed"),
-                PendingOrders = orders.Count(o => o.CurrentStatus == "Pending")
+                PendingOrders = orders.Count(o => o.CurrentStatus == "Pending"),
+                InProgressOrders = orders.Count(o => o.CurrentStatus == "In Progress")
             };
 
             if (stats.TotalOrderValue > 0)
@@ -240,6 +249,7 @@ namespace Backend.Services
                 Address = order.Address,
                 AssignedToUserId = order.AssignedToUserId,
                 AssignedToUserName = order.AssignedToUser?.Username,
+                AssignedToName = string.IsNullOrWhiteSpace(order.AssignedToName) ? order.AssignedToUser?.Username ?? string.Empty : order.AssignedToName,
                 ProductName = order.ProductName,
                 OrderQuantityMeters = order.OrderQuantityMeters,
                 CostPerMeterPO = order.CostPerMeterPO,
@@ -252,6 +262,7 @@ namespace Backend.Services
                 AmountReceived = order.AmountReceived,
                 AmountToBeReceived = order.AmountToBeReceived,
                 PendingPayments = order.PendingPayments,
+                UploadedImages = order.UploadedImages,
                 Comments = order.Comments,
                 CreatedAt = order.CreatedAt,
                 UpdatedAt = order.UpdatedAt

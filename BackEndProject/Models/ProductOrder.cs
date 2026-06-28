@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
 namespace Backend.Models
 {
@@ -28,6 +29,9 @@ namespace Backend.Models
 
         [ForeignKey("AssignedToUser")]
         public int? AssignedToUserId { get; set; }
+
+        [StringLength(200)]
+        public string AssignedToName { get; set; } = string.Empty;
 
         [StringLength(200)]
         public string ProductName { get; set; } = string.Empty;
@@ -64,6 +68,17 @@ namespace Backend.Models
 
         [Range(0, double.MaxValue)]
         public decimal PendingPayments { get; set; }
+
+        public string UploadedImagesJson { get; set; } = "[]";
+
+        [NotMapped]
+        public List<string> UploadedImages
+        {
+            get => string.IsNullOrWhiteSpace(UploadedImagesJson)
+                ? new List<string>()
+                : JsonSerializer.Deserialize<List<string>>(UploadedImagesJson) ?? new List<string>();
+            set => UploadedImagesJson = JsonSerializer.Serialize(value ?? new List<string>());
+        }
 
         [StringLength(1000)]
         public string Comments { get; set; } = string.Empty;
